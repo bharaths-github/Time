@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Left to 70</title>
+</head>
+<body>
+    <h1>Time Left Until You Turn 70</h1>
+    <form action="/time_left" method="get" id="dob-form">
+        <label for="dob">Enter your date of birth (DDMMYYYY):</label>
+        <input type="text" id="dob" name="dob" placeholder="07012000" required>
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2 id="result"></h2>
+
+    <script>
+        const form = document.getElementById("dob-form");
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+            const dob = document.getElementById("dob").value;
+
+            fetch(`/time_left/${dob}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById("result").textContent = data.error;
+                    } else {
+                        document.getElementById("result").innerHTML = `
+                            Years: ${data.years}<br>
+                            Months: ${data.months}<br>
+                            Weeks: ${data.weeks}<br>
+                            Days: ${data.days}<br>
+                            Hours: ${data.hours}<br>
+                            Minutes: ${data.minutes}<br>
+                            Seconds: ${data.seconds}`;
+                    }
+                })
+                .catch(error => console.log(error));
+        });
+    </script>
+</body>
+</html>

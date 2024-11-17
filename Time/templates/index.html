@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIFE COUNTDOWN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica', sans-serif;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+            text-align: center;
+            transition: background 1s ease;
+            background: linear-gradient(to right, #f8b400, #f8b400); /* Default background */
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            justify-content: space-between;
+        }
+
+        .left, .right {
+            width: 48%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .result {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            max-width: 700px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: space-evenly;
+            flex-wrap: wrap;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .countdown div {
+            font-size: 3em;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 10px;
+            min-width: 150px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .countdown div:hover {
+            transform: scale(1.1);
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .countdown div span {
+            display: block;
+            font-size: 0.5em;
+            margin-top: 5px;
+        }
+
+        .right .info {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .right .info div {
+            font-size: 2em; /* Increased font size for month info */
+            margin-bottom: 20px; /* Increased space between lines */
+        }
+
+        /* New Horizontal Progress Bar */
+        .progress-bar-wrapper {
+            width: 100%;
+            height: 50px; /* Height of the bar */
+            background-color: #f0f0f0;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%; /* Default to 0% */
+            background-color: #f8b400;
+            border-radius: 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .error {
+            color: #ff3838;
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .left, .right {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .countdown div {
+                font-size: 2em;
+            }
+
+            .right .info div {
+                font-size: 1.6em; /* Smaller font size for month info on small screens */
+                margin-bottom: 15px; /* Reduced margin */
+            }
+
+            .progress-bar-wrapper {
+                width: 90%; /* Slightly smaller progress bar on small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="left">
+            <h1>LIFE COUNTDOWN</h1>
+            <div class="result" id="result"></div>
+        </div>
+        <div class="right">
+            <div class="info" id="info">
+                <div><strong id="current-month"></strong></div>
+                <div><strong id="days-left-month"></strong></div>
+                <div><strong id="hours-left-day"></strong></div>
+                
+
+                <!-- Horizontal progress bar for year progress -->
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar" id="progress-bar"></div>
+                    <div class="progress-text" id="year-percentage">0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let intervalId;
+
+        // Function to dynamically set background based on time of day
+        function updateBackground() {
+            const now = new Date();
+            const hour = now.getHours();
+
+            // Morning: light yellow gradient
+            if (hour >= 6 && hour < 12) {
+                document.body.style.background = 'linear-gradient(to right, #f8b400, #f8b400)';
+            } 
+            // Afternoon: soft orange gradient
+            else if (hour >= 12 && hour < 18) {
+                document.body.style.background = 'linear-gradient(to right, #ff7e5f, #feb47b)';
+            } 
+            // Night: dark blue gradient
+            else {
+                document.body.style.background = 'linear-gradient(to right, #2c3e50, #34495e)';
+            }
+        }
+
+        // Call updateBackground to set background on page load
+        updateBackground();
+        // Update background dynamically every hour
+        setInterval(updateBackground, 3600000); // 1 hour in milliseconds
+
+        // Function to fetch the remaining time and year progress from the Flask server
+        function fetchTimeLeft() {
+            fetch(`/time_left`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById("result").innerHTML = `<p class="error">${data.error}</p>`;
+                        clearInterval(intervalId); // Stop the ticking
+                    } else {
+                        // Update countdown
+                        document.getElementById("result").innerHTML = `
+                            <div class="countdown">
+                                <div><strong>${data.days}</strong><span>Days</span></div>
+                                <div><strong>${data.hours}</strong><span>Hours</span></div>
+                                <div><strong>${data.minutes}</strong><span>Minutes</span></div>
+                                <div><strong>${data.seconds}</strong><span>Seconds</span></div>
+                            </div>
+                        `;
+
+                        // Update right-side info
+                        document.getElementById("current-month").innerText = `Month: ${data.current_month}`;
+                        document.getElementById("days-left-month").innerText = `Days: ${data.days_left_in_month}`;
+                        document.getElementById("hours-left-day").innerText = `Hours: ${data.hours_left_in_day}`;
+
+                        // Update year progress bar
+                        const yearProgress = data.year_progress;
+                        const progressBar = document.getElementById('progress-bar');
+                        const progressText = document.getElementById('year-percentage');
+                        
+                        // Set width of progress bar
+                        progressBar.style.width = `${yearProgress}%`;
+
+                        // Update percentage text
+                        progressText.innerText = `${Math.round(yearProgress)}%`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("result").innerHTML = `<p class="error">Error: Unable to fetch data.</p>`;
+                    clearInterval(intervalId); // Stop the ticking in case of error
+                });
+        }
+
+        // Automatically start the countdown when the page loads
+        intervalId = setInterval(fetchTimeLeft, 1000); // Fetch every second
+    </script>
+
+</body>
+</html>
